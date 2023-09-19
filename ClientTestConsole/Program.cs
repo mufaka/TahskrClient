@@ -21,8 +21,108 @@ namespace MyApp // Note: actual namespace depends on the project name.
             Console.WriteLine();
 
             //CheckCompletedYesterday(client);
+            
+            //CreateDailyToDos(client, incomplete);
+
+            var toDoCategories = GetToDoCategories(GetConfigurationString());
             var incomplete = client.ToDoGetAll(null, false, false);
-            CreateDailyToDos(client, incomplete);
+
+            foreach (ToDoCategory toDoCategory in toDoCategories)
+            {
+                ToDoList? toDoList = null;
+                if (toDoCategory.Name != "Inbox")
+                {
+                    toDoList = client.ToDoListCreate(toDoCategory.Name, true);
+                }
+
+                CreateToDo(client, toDoList, toDoCategory.Summaries, incomplete);
+            }
+        }
+
+        private static string GetConfigurationString()
+        {
+            return @"Test Inbox
+[Daily]
+Arm Care
+Rauh Drills
+Throwing
+Workout
+Glove Work
+
+[Homework]
+Check Email
+Make Homework List
+Do Homework
+
+[Study]
+Enter New Mochi Cards
+Review Mochi Cards";
+        }
+
+        private class ToDoCategory
+        {
+            public string Name { get; set; } = String.Empty;
+            public List<string> Summaries { get; set; } = new List<string>();
+        }
+
+        private static List<ToDoCategory> GetToDoCategories(string configurationString)
+        {
+            var list = new List<ToDoCategory>();
+
+            StringReader reader = new StringReader(configurationString);
+            string? line;
+
+            list.Add(new ToDoCategory() { Name = "Inbox" });
+
+            while ((line = reader.ReadLine()) != null)
+            {
+                var trimmedLine = line.Trim();
+
+                if (trimmedLine.StartsWith("[") && trimmedLine.EndsWith("]"))
+                {
+                    list.Add(new ToDoCategory { 
+                        Name = trimmedLine[1..^1].Trim() 
+                    });
+                }
+                else
+                {
+                    if (!String.IsNullOrWhiteSpace(trimmedLine))
+                    {
+                        list[^1].Summaries.Add(trimmedLine);
+                    }
+                }
+            };
+
+            return list;
+        }
+
+        private static void CreateToDo(ApiClient client, ToDoList? toDoList, List<string> items, List<ToDo> incomplete)
+        {
+            foreach (string item in items)
+            {
+                // if there is a matching Summary in the incomplete list, don't add a duplicate
+                var duplicate = incomplete.Where(t => t.Summary == item).FirstOrDefault();
+
+                if (duplicate == null)
+                {
+                    client.ToDoCreate(new ToDo()
+                    {
+                        Summary = item,
+                        ListId = toDoList?.Id
+                    });
+                }
+                else
+                {
+                    // un-snooze if snoozed. The time of the snooze is captured
+                    // by default so it needs to be cleared.
+                    if (duplicate.SnoozeDatetime.HasValue)
+                    {
+                        duplicate.SnoozeDatetime = DateTime.Now.Date;
+                        duplicate.ListId = toDoList?.Id;
+                        client.ToDoUpdate(duplicate);
+                    }
+                }
+            }
         }
 
         private static void ShowAllIncomplete(ApiClient client)
@@ -51,70 +151,6 @@ namespace MyApp // Note: actual namespace depends on the project name.
             }
         }
 
-        // TODO: How to make this configurable for a plugin to KronoMata?
-        private static void CreateDailyToDos(ApiClient client, List<ToDo> incomplete)
-        {
-            var dailyToDoList = client.ToDoListCreate("Daily", true);
-            var homeworkToDoList = client.ToDoListCreate("Homework", true);
-            var studyToDoList = client.ToDoListCreate("Study", true);
-
-            var dailyList = new List<string>()
-            {
-                "Arm Care",
-                "Rauh Drills",
-                "Throwing",
-                "Workout",
-                "Glove Work"
-            };
-
-            var homeworkList = new List<string>()
-            {
-                "Check Email",
-                "Make Homework List",
-                "Do Homework"
-            };
-
-            var mochiList = new List<string>()
-            {
-                "Enter New Mochi Cards",
-                "Review Mochi Cards"
-            };
-
-            CreateToDo(client, dailyToDoList, dailyList, incomplete);
-            CreateToDo(client, homeworkToDoList, homeworkList, incomplete);
-            CreateToDo(client, studyToDoList, mochiList, incomplete);
-        }
-
-        private static void CreateToDo(ApiClient client, ToDoList toDoList, List<string> items, List<ToDo> incomplete)
-        {
-            foreach (string item in items)
-            {
-                // if there is a matching Summary in the incomplete list, don't add a duplicate
-                var duplicate = incomplete.Where(t => t.Summary == item).FirstOrDefault();
-
-                if (duplicate == null)
-                {
-                    client.ToDoCreate(new ToDo()
-                    {
-                        Summary = item,
-                        ListId = toDoList.Id
-                    });
-
-                    Console.WriteLine($"Added {item}");
-                }
-                else
-                {
-                    // un-snooze if snoozed. The time of the snooze is captured
-                    // by default so it needs to be cleared.
-                    if (duplicate.SnoozeDatetime.HasValue)
-                    {
-                        duplicate.SnoozeDatetime = DateTime.Now.Date;
-                        client.ToDoUpdate(duplicate);
-                        Console.WriteLine($"Un-snoozed {item}");
-                    }
-                }
-            }
-        }
     }
 }
 
