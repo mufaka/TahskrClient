@@ -14,12 +14,15 @@ namespace MyApp // Note: actual namespace depends on the project name.
             Console.WriteLine(systemInformation);
             Console.WriteLine();
 
-            AuthToken loggedInUser = client.Authenticate("test2", "test2");
+            AuthToken loggedInUser = client.Authenticate("test2", "test2asdasdasdasd");
             Console.WriteLine("LOGGED IN USER");
             Console.WriteLine("".PadLeft(20, '-'));
             Console.WriteLine(loggedInUser);
             Console.WriteLine();
 
+            client.UserCreate("BAD PASSWORD", "test3", "test3");
+
+            return;
             //CheckCompletedYesterday(client);
             
             //CreateDailyToDos(client, incomplete);

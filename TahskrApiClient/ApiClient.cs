@@ -13,6 +13,11 @@ namespace TahskrApiClient
         public ApiClient(string serverUrl)
         {
             _httpClient = new HttpClient();
+
+            if (serverUrl.EndsWith('/'))
+            {
+                serverUrl = serverUrl.Substring(0, serverUrl.Length - 1);
+            }
             _serverUrl = serverUrl;
         }
 
@@ -84,7 +89,14 @@ namespace TahskrApiClient
             }
             else
             {
-                throw new Exception($"Invalid request sent to /auth. Received {response.StatusCode}");
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    throw new UnauthorizedAccessException("Invalid credentials provided.");
+                }
+                else
+                {
+                    throw new Exception($"Invalid request sent to /auth. Received {response.StatusCode}");
+                }
             }
         }
 

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TahskrApiClient", "TahskrAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientTestConsole", "ClientTestConsole\ClientTestConsole.csproj", "{C1948862-FD82-40F5-9990-193D9DB10D6F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TahskrPlugins", "TahskrPlugins\TahskrPlugins.csproj", "{19EF17EF-E92C-4289-AE22-7540002B63D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C1948862-FD82-40F5-9990-193D9DB10D6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1948862-FD82-40F5-9990-193D9DB10D6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1948862-FD82-40F5-9990-193D9DB10D6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19EF17EF-E92C-4289-AE22-7540002B63D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19EF17EF-E92C-4289-AE22-7540002B63D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19EF17EF-E92C-4289-AE22-7540002B63D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19EF17EF-E92C-4289-AE22-7540002B63D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
