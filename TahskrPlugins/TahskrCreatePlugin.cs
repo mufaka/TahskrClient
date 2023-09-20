@@ -1,4 +1,5 @@
 ﻿using KronoMata.Public;
+using System.Text;
 using TahskrApiClient;
 
 namespace TahskrPlugins
@@ -9,7 +10,7 @@ namespace TahskrPlugins
 
         public string Description { get { return "Creates configured Tahskr To Dos."; } }
 
-        public string Version { get { return "1.0"; } }
+        public string Version { get { return "1.1"; } }
 
         public List<PluginParameter> Parameters
         {
@@ -100,6 +101,8 @@ namespace TahskrPlugins
                     var toDoCategories = GetToDoCategories(configuration);
                     var incomplete = client.ToDoGetAll(null, false, false);
 
+                    var buff = new StringBuilder();
+
                     foreach (ToDoCategory toDoCategory in toDoCategories)
                     {
                         ToDoList? toDoList = null;
@@ -108,8 +111,20 @@ namespace TahskrPlugins
                             toDoList = client.ToDoListCreate(toDoCategory.Name, true);
                         }
 
-                        CreateToDo(client, toDoList, toDoCategory.Summaries, incomplete);
+                        CreateToDo(client, toDoList, toDoCategory.Summaries, incomplete, buff);
                     }
+
+                    if (buff.Length == 0)
+                    {
+                        buff.Append("No ToDos were created.");
+                    }
+
+                    log.Add(new PluginResult()
+                    {
+                        IsError = true,
+                        Message = $"Finished creating ToDos for {userName}",
+                        Detail = buff.ToString()
+                    });
 
                 }
             }
@@ -164,7 +179,7 @@ namespace TahskrPlugins
             return list;
         }
 
-        private static void CreateToDo(ApiClient client, ToDoList? toDoList, List<string> items, List<ToDo> incomplete)
+        private static void CreateToDo(ApiClient client, ToDoList? toDoList, List<string> items, List<ToDo> incomplete, StringBuilder buff)
         {
             foreach (string item in items)
             {
@@ -178,6 +193,7 @@ namespace TahskrPlugins
                         Summary = item,
                         ListId = toDoList?.Id
                     });
+                    buff.AppendLine($"Created {item}");
                 }
                 else
                 {
@@ -188,6 +204,11 @@ namespace TahskrPlugins
                         duplicate.SnoozeDatetime = DateTime.Now.Date;
                         duplicate.ListId = toDoList?.Id;
                         client.ToDoUpdate(duplicate);
+                        buff.AppendLine($"Un-Snoozed {item}");
+                    }
+                    else
+                    {
+                        buff.AppendLine($"{item} already existed.");
                     }
                 }
             }
