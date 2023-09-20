@@ -121,7 +121,7 @@ namespace TahskrPlugins
 
                     log.Add(new PluginResult()
                     {
-                        IsError = true,
+                        IsError = false,
                         Message = $"Finished creating ToDos for {userName}",
                         Detail = buff.ToString()
                     });
